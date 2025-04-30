@@ -13,7 +13,7 @@ from .utils.exchange import getPasswordNow
 
 
 def main():
-    args = argParser.parse(sys.argv)
+    args = argParser.parse(sys.argv[1:])
     session = PromptSession()
 
     pwd = args.password
