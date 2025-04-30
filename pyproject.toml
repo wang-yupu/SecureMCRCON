@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "securemcrcon"
-version = "0.0.1"
+version = "0.0.2"
 description = "A RCON protocol client for Minecraft RCON and my SecureRCON protocol"
 readme = "README.md"
 license = { text = "MIT" }
