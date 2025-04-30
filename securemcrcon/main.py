@@ -1,17 +1,19 @@
-from cli import argParser
+import json
 import sys
+from datetime import datetime
+
 from prompt_toolkit import PromptSession
 from prompt_toolkit.patch_stdout import patch_stdout
-from client.legacyRCON import LegacyRCON
-from client.encryptedRCON import EncryptedRCON
-from utils.exchange import getPasswordNow
-import json
-from datetime import datetime
-from cli.keyManager import verifyKey
+
+from .cli import argParser
+from .cli.keyManager import verifyKey
+from .client.encryptedRCON import EncryptedRCON
+from .client.legacyRCON import LegacyRCON
+from .utils.exchange import getPasswordNow
 
 
 def main():
-    args = argParser.parse(sys.argv[1:])
+    args = argParser.parse(sys.argv)
     session = PromptSession()
 
     pwd = args.password

@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=80.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "securemcrcon"
+version = "0.0.0"
+description = "A RCON protocol client for Minecraft RCON and my SecureRCON protocol"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "wangyupu", email = "me@wytl.cc" }]
+requires-python = ">=3.10"
+dependencies = ["prompt_toolkit>=3.0.0"]
+
+[project.urls]
+Homepage = "https://github.com/wang-yupu/SecureMCRCON"
+
+[project.scripts]
+smcrcon = "securemcrcon.main:main"
+
+[tool.setuptools]
+package-dir = { "" = "." }
+
+[tool.setuptools.packages.find]
+where = ["."]

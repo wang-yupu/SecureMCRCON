@@ -1,10 +1,10 @@
 from typing import Callable
 from . import RCONClient
-from utils.packet import *
+from securemcrcon.utils.packet import *
 import socket as socketLib
 import threading
 
-__all__ = ['LegacyRCON  ']
+__all__ = ['LegacyRCON']
 
 
 class LegacyRCON(RCONClient):

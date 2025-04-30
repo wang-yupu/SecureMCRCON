@@ -1,10 +1,10 @@
 from . import RCONClient
-from utils.packet import *
+from securemcrcon.utils.packet import *
 import socket as socketLib
-import utils.exchange
+import securemcrcon.utils.exchange as exchange
 import base64
 from cryptography.hazmat.primitives import serialization
-from utils import encrypt
+from securemcrcon.utils import encrypt
 import threading
 from typing import Callable
 
@@ -50,7 +50,7 @@ class EncryptedRCON(RCONClient):
             raise Exception("No connection")
 
     def connect(self, hostname, port, password, skipAuth: bool = False) -> bool:
-        self.clientPrivate, self.clientPublic = utils.exchange.newKeyPair()
+        self.clientPrivate, self.clientPublic = exchange.newKeyPair()
         self.socket = socketLib.socket()
         self.socket.connect((hostname, port))
         # exchange pkey
@@ -61,15 +61,15 @@ class EncryptedRCON(RCONClient):
         if not isinstance(exchangePublicResult, RCONPacket):
             raise Exception(f"Failed to encrypt connect. Maybe server does not support encrypt.")
         # 接收服务端公钥
-        serverPublic = utils.exchange.x25519.X25519PublicKey.from_public_bytes(
+        serverPublic = exchange.x25519.X25519PublicKey.from_public_bytes(
             base64.b85decode(exchangePublicResult.payload))
-        self.key = utils.exchange.exchange(self.clientPrivate, serverPublic, None, b'INFO', 32)
+        self.key = exchange.exchange(self.clientPrivate, serverPublic, None, b'INFO', 32)
         # 发自己的公钥
         self.send(RCONPacket(0, self.packetID, 255, self.clientPublic.public_bytes(encoding=serialization.Encoding.Raw,
                                                                                    format=serialization.PublicFormat.Raw)))
         self.encrypted = True
         self.packetID = 0
-        self.publicKeyHash = utils.exchange.publicToHash(serverPublic)
+        self.publicKeyHash = exchange.publicToHash(serverPublic)
 
         # auth
         if not skipAuth:
