@@ -28,9 +28,10 @@ class EncryptedRCON(RCONClient):
             if self.encrypted:
                 encryptedData = encrypt.ChaCha20Poly1305Encrypt(d, self.key, None, self.packetID)
                 self.socket.send(encryptedData)
+                self.packetID += 1
             else:
                 self.socket.send(d)
-            self.packetID += 1
+                self.packetID += 1
         else:
             raise Exception("No connection")
 
@@ -41,7 +42,7 @@ class EncryptedRCON(RCONClient):
                 try:
                     data = encrypt.ChaCha20Poly1305Decrypt(data, self.key, None, self.packetID)
                 except Exception as e:
-                    raise ValueError(f"Decrypt failed: {e}")
+                    raise ValueError(f"Decrypt failed {e} {data} ({self.packetID})")
             try:
                 return rawToPacketClass(data)
             except ValueError:
@@ -60,18 +61,19 @@ class EncryptedRCON(RCONClient):
             raise Exception(f"Failed to encrypt connect. Maybe server does not support encrypt.")
         if not isinstance(exchangePublicResult, RCONPacket):
             raise Exception(f"Failed to encrypt connect. Maybe server does not support encrypt.")
+            # 发自己的公钥
+        self.send(RCONPacket(0, self.packetID, 255, self.clientPublic.public_bytes(encoding=serialization.Encoding.Raw,
+                                                                                   format=serialization.PublicFormat.Raw)))
         # 接收服务端公钥
         serverPublic = exchange.x25519.X25519PublicKey.from_public_bytes(
             base64.b85decode(exchangePublicResult.payload))
         self.key = exchange.exchange(self.clientPrivate, serverPublic, None, b'INFO', 32)
-        # 发自己的公钥
-        self.send(RCONPacket(0, self.packetID, 255, self.clientPublic.public_bytes(encoding=serialization.Encoding.Raw,
-                                                                                   format=serialization.PublicFormat.Raw)))
+
         self.encrypted = True
-        self.packetID = 0
         self.publicKeyHash = exchange.publicToHash(serverPublic)
 
         # auth
+        self.packetID = 0
         if not skipAuth:
             self.send(RCONPacket(0, self.packetID, 3, password.encode(encoding='utf-8')))
             result = self.recv()
